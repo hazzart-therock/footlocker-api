@@ -16,6 +16,10 @@ def check():
     resultado = verificar_disponibilidad(url, talla)
     return jsonify(resultado)
 
+@app.route('/')
+def index():
+    return "Footlocker API is running"
+
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Render define esta variable
+    port = int(os.environ.get("PORT", 10000))  # Render define esta variable automáticamente
     app.run(host="0.0.0.0", port=port)

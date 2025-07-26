@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from scraper import verificar_disponibilidad
+import os
 
 app = Flask(__name__)
 
@@ -16,4 +17,5 @@ def check():
     return jsonify(resultado)
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get("PORT", 10000))  # Render define esta variable
+    app.run(host="0.0.0.0", port=port)

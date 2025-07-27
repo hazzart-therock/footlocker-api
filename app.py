@@ -4,7 +4,7 @@ from scraper import verificar_disponibilidad  # Asegúrate de que esta función 
 
 app = Flask(__name__)
 
-# ✅ Permitir solicitudes desde tu dominio principal y con www
+# ✅ CORS configurado para permitir solicitudes desde tu dominio
 CORS(app, resources={r"/check": {"origins": [
     "https://therocksport.com",
     "https://www.therocksport.com"
@@ -18,6 +18,7 @@ def check():
     url = data.get('url')
     talla = data.get('talla')
 
+    # Validación de parámetros
     if not url or not talla:
         return jsonify({
             "disponible": False,
@@ -25,10 +26,11 @@ def check():
         }), 400
 
     try:
+        # Ejecutar el scraper
         resultado = verificar_disponibilidad(url, talla)
 
-        # Asegurarse de que el resultado tenga la clave 'disponible'
-        if "disponible" not in resultado:
+        # Validar respuesta del scraper
+        if not isinstance(resultado, dict) or "disponible" not in resultado:
             return jsonify({
                 "disponible": False,
                 "error": "Respuesta inválida del scraper"

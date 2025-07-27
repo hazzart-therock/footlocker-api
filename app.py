@@ -1,19 +1,25 @@
 from flask import Flask, request, jsonify
-from scraper import verificar_disponibilidad
 import os
 
 app = Flask(__name__)
 
 @app.route('/check', methods=['POST'])
 def check():
-    data = request.get_json()
+    data = request.get_json(force=True)
+    print("📦 Datos recibidos:", data)
+
     url = data.get('url')
     talla = data.get('talla')
 
     if not url or not talla:
         return jsonify({"error": "Faltan parámetros"}), 400
 
-    resultado = verificar_disponibilidad(url, talla)
+    # 🔁 Simulación temporal: solo la talla "10.0" está disponible
+    if talla == "10.0":
+        resultado = {"disponible": True}
+    else:
+        resultado = {"disponible": False}
+
     return jsonify(resultado)
 
 @app.route('/')

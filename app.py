@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from scraper import verificar_disponibilidad
 import os
 
 app = Flask(__name__)
@@ -14,13 +15,12 @@ def check():
     if not url or not talla:
         return jsonify({"error": "Faltan parámetros"}), 400
 
-    # 🔁 Simulación temporal: solo la talla "10.0" está disponible
-    if talla == "10.0":
-        resultado = {"disponible": True}
-    else:
-        resultado = {"disponible": False}
-
-    return jsonify(resultado)
+    try:
+        resultado = verificar_disponibilidad(url, talla)
+        return jsonify(resultado)
+    except Exception as e:
+        print("❌ Error en verificar_disponibilidad:", e)
+        return jsonify({"error": "Error interno en el scraper"}), 500
 
 @app.route('/')
 def index():

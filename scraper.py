@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import traceback
 
 def verificar_disponibilidad(url, talla):
     headers = {
@@ -11,7 +10,7 @@ def verificar_disponibilidad(url, talla):
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
     except requests.RequestException:
-        return {"status": "error", "message": "Fallo al obtener la página"}
+        return {"disponible": False, "error": "Fallo al obtener la página"}
 
     try:
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -19,14 +18,19 @@ def verificar_disponibilidad(url, talla):
 
         for boton in botones:
             span = boton.find('span')
-            if span and span.text.strip() == talla:
-                clases = boton.get('class', [])
-                if 'SizeSelectorNewDesign-button--disabled' not in clases:
-                    return {"status": "ok", "disponibilidad": "Disponible"}
+            texto = span.text.strip() if span else ""
+            clases = boton.get('class', [])
+
+            # Verifica si el texto coincide con la talla
+            if texto == talla:
+                # Verifica si está deshabilitado
+                if 'SizeSelectorNewDesign-button--disabled' in clases or boton.has_attr('disabled'):
+                    return {"disponible": False}
                 else:
-                    return {"status": "ok", "disponibilidad": "Agotado"}
+                    return {"disponible": True}
 
-        return {"status": "ok", "disponibilidad": "Agotado"}
+        # Si no se encontró la talla en el HTML
+        return {"disponible": False, "error": "Talla no encontrada"}
 
-    except Exception:
-        return {"status": "error", "message": "Fallo al procesar HTML"}
+    except Exception as e:
+        return {"disponible": False, "error": "Fallo al procesar HTML"}

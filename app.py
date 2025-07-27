@@ -4,7 +4,7 @@ from scraper import verificar_disponibilidad  # Asegúrate de que esta función 
 
 app = Flask(__name__)
 
-# Permitir solicitudes desde tu dominio principal y con www
+# ✅ Permitir solicitudes desde tu dominio principal y con www
 CORS(app, resources={r"/check": {"origins": [
     "https://therocksport.com",
     "https://www.therocksport.com"
@@ -19,15 +19,30 @@ def check():
     talla = data.get('talla')
 
     if not url or not talla:
-        return jsonify({"disponible": False, "error": "Faltan parámetros"}), 400
+        return jsonify({
+            "disponible": False,
+            "error": "Faltan parámetros: se requiere 'url' y 'talla'"
+        }), 400
 
     try:
         resultado = verificar_disponibilidad(url, talla)
+
+        # Asegurarse de que el resultado tenga la clave 'disponible'
+        if "disponible" not in resultado:
+            return jsonify({
+                "disponible": False,
+                "error": "Respuesta inválida del scraper"
+            }), 500
+
         return jsonify(resultado)
+
     except Exception as e:
         print("❌ Error en verificar_disponibilidad:", e)
-        return jsonify({"disponible": False, "error": "Error interno en el scraper"}), 500
+        return jsonify({
+            "disponible": False,
+            "error": "Error interno en el scraper"
+        }), 500
 
 @app.route('/')
 def index():
-    return "Footlocker API is running"
+    return "✅ Footlocker API is running"

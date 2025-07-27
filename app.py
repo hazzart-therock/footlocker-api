@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from scraper import verificar_disponibilidad
+from scraper import verificar_disponibilidad  # Asegúrate de que esta función esté bien definida
 
 app = Flask(__name__)
-CORS(app, resources={r"/check": {"origins": "https://therocksport.com"}})
+
+# Permitir solicitudes desde tu dominio principal y con www
+CORS(app, resources={r"/check": {"origins": [
+    "https://therocksport.com",
+    "https://www.therocksport.com"
+]}})
 
 @app.route('/check', methods=['POST'])
 def check():

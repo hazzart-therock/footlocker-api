@@ -42,7 +42,8 @@ def verificar_disponibilidad(url, talla):
             clases = boton.get("class", [])
             aria_label = boton.get("aria-label", "")
 
-            if texto == talla:
+            # Comparación flexible
+            if talla.strip() in texto.strip():
                 if "disabled" in clases or "Sold Out" in aria_label:
                     return {"disponible": False}
                 else:

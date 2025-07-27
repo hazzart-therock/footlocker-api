@@ -1,50 +1,56 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from scraper import verificar_disponibilidad  # Asegúrate de que esta función esté bien definida
+import requests
 
 app = Flask(__name__)
 
-# ✅ CORS configurado para permitir solicitudes desde tu dominio
-CORS(app, resources={r"/check": {"origins": [
+# ✅ CORS global para permitir solicitudes desde tu dominio
+CORS(app, origins=[
     "https://therocksport.com",
     "https://www.therocksport.com"
-]}})
+])
 
-@app.route('/check', methods=['POST'])
+# 🟢 Ruta de prueba para verificar conectividad
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"status": "✅ API activa", "message": "pong"})
+
+# 🔍 Ruta principal para verificar disponibilidad
+@app.route("/check", methods=["POST"])
 def check():
-    data = request.get_json(force=True)
-    print("📦 Datos recibidos:", data)
-
-    url = data.get('url')
-    talla = data.get('talla')
-
-    # Validación de parámetros
-    if not url or not talla:
-        return jsonify({
-            "disponible": False,
-            "error": "Faltan parámetros: se requiere 'url' y 'talla'"
-        }), 400
+    print("✅ Solicitud recibida en /check")
 
     try:
-        # Ejecutar el scraper
-        resultado = verificar_disponibilidad(url, talla)
+        data = request.get_json()
+        print("📦 Datos recibidos:", data)
 
-        # Validar respuesta del scraper
-        if not isinstance(resultado, dict) or "disponible" not in resultado:
-            return jsonify({
-                "disponible": False,
-                "error": "Respuesta inválida del scraper"
-            }), 500
+        url = data.get("url")
+        talla = data.get("talla")
 
-        return jsonify(resultado)
+        if not url or not talla:
+            return jsonify({"error": "Faltan parámetros"}), 400
+
+        # 🧪 Simulación de scraping o verificación real
+        # Aquí puedes integrar tu lógica real de scraping
+        disponible = "footlocker" in url and talla in ["10", "10.5", "11"]
+
+        print(f"🔎 Verificando talla {talla} en {url} → {'Disponible' if disponible else 'No disponible'}")
+
+        return jsonify({
+            "disponible": disponible,
+            "talla": talla,
+            "url": url
+        })
 
     except Exception as e:
-        print("❌ Error en verificar_disponibilidad:", e)
-        return jsonify({
-            "disponible": False,
-            "error": "Error interno en el scraper"
-        }), 500
+        print("❌ Error interno:", str(e))
+        return jsonify({"error": "Error interno"}), 500
 
-@app.route('/')
-def index():
+# 🟢 Ruta raíz para confirmar que el backend está activo
+@app.route("/", methods=["GET"])
+def home():
     return "✅ Footlocker API is running"
+
+# 🚀 Ejecutar la app
+if __name__ == "__main__":
+    app.run(debug=True)

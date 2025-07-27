@@ -20,16 +20,14 @@ def verificar_disponibilidad(url, talla):
             span = boton.find('span')
             texto = span.text.strip() if span else ""
             clases = boton.get('class', [])
+            aria_label = boton.get('aria-label', '')
 
-            # Verifica si el texto coincide con la talla
             if texto == talla:
-                # Verifica si está deshabilitado
-                if 'SizeSelectorNewDesign-button--disabled' in clases or boton.has_attr('disabled'):
+                if 'SizeSelectorNewDesign-button--disabled' in clases or 'Sold Out' in aria_label:
                     return {"disponible": False}
                 else:
                     return {"disponible": True}
 
-        # Si no se encontró la talla en el HTML
         return {"disponible": False, "error": "Talla no encontrada"}
 
     except Exception as e:

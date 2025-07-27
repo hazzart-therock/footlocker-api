@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from scraper import verificar_disponibilidad
-import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/check": {"origins": "https://therocksport.com"}})
 
 @app.route('/check', methods=['POST'])
 def check():
@@ -13,19 +14,15 @@ def check():
     talla = data.get('talla')
 
     if not url or not talla:
-        return jsonify({"error": "Faltan parámetros"}), 400
+        return jsonify({"disponible": False, "error": "Faltan parámetros"}), 400
 
     try:
         resultado = verificar_disponibilidad(url, talla)
         return jsonify(resultado)
     except Exception as e:
         print("❌ Error en verificar_disponibilidad:", e)
-        return jsonify({"error": "Error interno en el scraper"}), 500
+        return jsonify({"disponible": False, "error": "Error interno en el scraper"}), 500
 
 @app.route('/')
 def index():
     return "Footlocker API is running"
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Render define esta variable automáticamente
-    app.run(host="0.0.0.0", port=port)
